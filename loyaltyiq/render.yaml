@@ -1,0 +1,23 @@
+# Render Blueprint: New + > Blueprint > pick this repo. Free plan, no credit card needed for the web service.
+services:
+  - type: web
+    name: loyaltyiq
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    # One worker on purpose: SQLite is a single file and the recommender model lives in memory.
+    startCommand: gunicorn wsgi:app --workers 1 --threads 4 --timeout 120 --bind 0.0.0.0:$PORT
+    healthCheckPath: /healthz
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.12.7"
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DATABASE_PATH
+        value: /tmp/loyaltyiq.db
+      # Public site: set your own admin password in the Render dashboard instead of the default 1234.
+      # - key: ADMIN_PASSWORD
+      #   sync: false
+      # Optional: makes the assistant phrase answers with Claude. Leave unset for the built-in rule-based assistant.
+      # - key: ANTHROPIC_API_KEY
+      #   sync: false
